@@ -1,5 +1,5 @@
 import { Provider } from "react-redux";
-import appStore from "./store/appStore";
+import appStore from "./utils/appStore";
 import "./App.css";
 import AppRoutes from "./AppRoutes";
 
