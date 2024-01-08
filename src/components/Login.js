@@ -1,144 +1,133 @@
-import React, { useState } from "react";
-import { Form, Formik } from "formik";
-import * as Yup from "yup";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-
-import TextInput from "./TextInput";
-import { auth } from "../utils/Firebase";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
+import Header from "./Header";
+import { checkValidData } from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
 import { useDispatch } from "react-redux";
-import { addUser } from "../store/userSlice";
+import { addUser } from "../utils/userSlice";
+import { BG_URL, USER_AVATAR } from "../utils/constants";
 
 const Login = () => {
-
-  const navigate = useNavigate();
+  const [isSignInForm, setIsSignInForm] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
   const dispatch = useDispatch();
 
-  const [isSignIn, setIsSignIn] = useState(true);
-  const [errorMssg, setErrorMssg] = useState();
+  const name = useRef(null);
+  const email = useRef(null);
+  const password = useRef(null);
 
-  const onClickButton = () => {
-    setIsSignIn(!isSignIn);
-  };
+  const handleButtonClick = () => {
+    // const message = checkValidData(email.current.value, password.current.value);
+    // setErrorMessage(message);
+    // if (message) return;
 
-  const onSubmit = (values) => {
-    const { email, password } = values;
-    if (!isSignIn) {
-      createUserWithEmailAndPassword(auth, email, password)
+    if (!isSignInForm) {
+      // Sign Up Logic
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
         .then((userCredential) => {
-          // Signed up
           const user = userCredential.user;
-          console.log(user);
-          setErrorMssg("");
-          setIsSignIn(true);
+          updateProfile(user, {
+            displayName: name.current.value,
+            photoURL: USER_AVATAR,
+          })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
+              );
+            })
+            .catch((error) => {
+              setErrorMessage(error.message);
+            });
         })
         .catch((error) => {
-          console.log(error);
           const errorCode = error.code;
           const errorMessage = error.message;
-          setErrorMssg(`${errorCode} :  ${errorMessage}`);
+          setErrorMessage(errorCode + "-" + errorMessage);
         });
     } else {
-      signInWithEmailAndPassword(auth, email, password)
+      // Sign In Logic
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-          setErrorMssg("");
-          console.log(user);
-          navigate('/browser');
-          dispatch(addUser(user));
         })
         .catch((error) => {
-          console.log(error);
           const errorCode = error.code;
           const errorMessage = error.message;
-          setErrorMssg(`${errorCode} :  ${errorMessage}`);
+          setErrorMessage(errorCode + "-" + errorMessage);
         });
     }
   };
 
+  const toggleSignInForm = () => {
+    setIsSignInForm(!isSignInForm);
+  };
   return (
-    <div className="w-full h-full">
-      {/* bg image */}
-      <div className="absolute bg-opacity-80 w-full h-full object-cover">
-        <img
-          className="h-full  w-full object-cover"
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/c38a2d52-138e-48a3-ab68-36787ece46b3/eeb03fc9-99c6-438e-824d-32917ce55783/IN-en-20240101-popsignuptwoweeks-perspective_alpha_website_large.jpg"
-          alt="bgm"
-        />
+    <div>
+      <Header />
+      <div className="absolute">
+        <img className="h-full w-full object-fill" src={BG_URL} alt="logo" />
       </div>
-      {/* logo */}
-      <div className="absolute bg-gradient-to-b from-black w-full z-20">
-        <img
-          alt="logo"
-          className="w-44"
-          src="https://cdn.cookielaw.org/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
-        />
-      </div>
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="w-full md:w-4/12 absolute p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80"
+      >
+        <h1 className="font-bold text-3xl py-4">
+          {isSignInForm ? "Sign In" : "Sign Up"}
+        </h1>
 
-      <div className="abolute flex justify-around pt-20">
-        <div className="z-20 w-5/12 bg-black bg-opacity-80 p-10 rounded">
-          <h1 className="font-bold text-2xl text-white my-6">
-            {isSignIn ? "Sign In" : "New member? Sign Up"}
-          </h1>
-          <Formik
-            initialValues={{
-              email: "",
-              password: "",
-            }}
-            validationSchema={Yup.object({
-              password: Yup.string().required("Password cannot be empty"),
-              email: Yup.string()
-                .email("Invalid email address")
-                .required("email address cannot be empty"),
-            })}
-            onSubmit={onSubmit}
-          >
-            <Form>
-              <TextInput
-                label="Email Address"
-                name="email"
-                type="email"
-                placeholder="Email"
-              />
-              <TextInput
-                label="Password"
-                name="password"
-                type="password"
-                placeholder="Password"
-              />
-              <button
-                type="submit"
-                className="bg-[#e50914] text-white w-full p-3"
-              >
-                {isSignIn ? "Sign In" : "Sign Up"}
-              </button>
-            </Form>
-          </Formik>
-          <div className="text-red-600">{errorMssg}</div>
-
-          {!isSignIn ? (
-            <div
-              className="text-white cursor-pointer mt-4"
-              onClick={onClickButton}
-            >
-              Go to Sign in page
-            </div>
-          ) : (
-            <div className="text-slate-500 mt-4">
-              New to Netflix?
-              <span
-                className="text-white cursor-pointer ml-3"
-                onClick={onClickButton}
-              >
-                Sign up now
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+        {!isSignInForm && (
+          <input
+            ref={name}
+            type="text"
+            placeholder="Full Name"
+            className="p-4 my-4 w-full bg-gray-700"
+          />
+        )}
+        <input
+          ref={email}
+          type="text"
+          placeholder="Email Address"
+          className="p-2 my-4 w-full bg-gray-700"
+        />
+        <input
+          ref={password}
+          type="password"
+          placeholder="Password"
+          className="p-2 my-4 w-full bg-gray-700"
+        />
+        <p className="text-red-500 font-bold text-lg py-2">{errorMessage}</p>
+        <button
+          className="p-2 mb-4 bg-red-700 w-full rounded-lg"
+          onClick={handleButtonClick}
+        >
+          {isSignInForm ? "Sign In" : "Sign Up"}
+        </button>
+        <p className="py-4 cursor-pointer" onClick={toggleSignInForm}>
+          {isSignInForm
+            ? "New to Netflix? Sign Up Now"
+            : "Already registered? Sign In Now."}
+        </p>
+      </form>
     </div>
   );
 };
-
 export default Login;
