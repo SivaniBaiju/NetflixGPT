@@ -23,4 +23,4 @@ export const SUPPORTED_LANGUAGES = [
   { identifier: "spanish", name: "Spanish" },
 ];
 
-export const OPENAI_KEY = "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"; // move to .env file
+export const OPENAI_KEY = process.env.REACT_APP_OPENAI_API_KEY ;// move to .env file
