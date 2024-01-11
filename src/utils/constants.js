@@ -8,7 +8,7 @@ export const USER_AVATAR =
     method: 'GET',
     headers: {
       accept: 'application/json',
-      Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMTNkZGVhOGQ0NmU0N2E0ZTgzMmYwN2U2Nzk3NTc0YyIsInN1YiI6IjY1OTljZWY1ODc0MWM0MDFhM2YxYjNjNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.r2baTG2xWcSWNOm_kcGw-Z24kfJPV6gDF_dMENRTeJA'
+      Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMTNkZGVhOGQ0NmU0N2E0ZTgzMmYwN2U2Nzk3NTc0YyIsInN1YiI6IjY1OTljZWY1ODc0MWM0MDFhM2YxYjNjNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.r2baTG2xWcSWNOm_kcGw-Z24kfJPV6gDF_dMENRTeJA' // move to .env file
     }
   };
 
@@ -23,4 +23,4 @@ export const SUPPORTED_LANGUAGES = [
   { identifier: "spanish", name: "Spanish" },
 ];
 
-export const OPENAI_KEY = process.env.REACT_APP_OPENAI_KEY;
+export const OPENAI_KEY = "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"; // move to .env file
