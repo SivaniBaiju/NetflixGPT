@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "netflixgpt-sivani"
-  }
+    "default": "netflixgpt-sivanib",
+    "netflix": "netflixgpt-sivanib"
+  },
+  "targets": {},
+  "etags": {}
 }
